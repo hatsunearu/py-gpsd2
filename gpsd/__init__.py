@@ -56,18 +56,18 @@ class GpsResponse(object):
             result.hspeed = last_tpv['speed']
             result.error = {
                 'c': 0,
-                's': last_tpv['eps'],
-                't': last_tpv['ept'],
+                's': last_tpv['eps'] if 'eps' in last_tpv else 0,
+                't': last_tpv['ept'] if 'ept' in last_tpv else 0,
                 'v': 0,
-                'x': last_tpv['epx'],
-                'y': last_tpv['epy']
+                'x': last_tpv['epx'] if 'epx' in last_tpv else 0,
+                'y': last_tpv['epy'] if 'epy' in last_tpv else 0
             }
 
         if last_tpv['mode'] >= 3:
             result.alt = last_tpv['alt']
             result.climb = last_tpv['climb']
-            result.error['c'] = last_tpv['epc'],
-            result.error['v'] = last_tpv['epv']
+            result.error['c'] = last_tpv['epc'] if 'epc' in last_tpv else 0,
+            result.error['v'] = last_tpv['epv'] if 'epv' in last_tpv else 0
 
         return result
 
