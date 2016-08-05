@@ -29,3 +29,6 @@ Just import it and poll the gps. Only a single gpsd server a time is supported::
     # See the inline docs for GpsResponse for the available data
     print(packet.position())
 
+
+More detailed documentation is available in the inline docstrings in the module. A list is also readable in ``DOCS.md``
+(thanks @richteelbah for the detailed docs)
