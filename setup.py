@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
         name='gpsd-py3',
-        version='0.1.0',
+        version='0.2.0',
         packages=['gpsd'],
         url='https://github.com/MartijnBraam/gpsd-py3',
         license='MIT',
