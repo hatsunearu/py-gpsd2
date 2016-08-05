@@ -24,14 +24,52 @@ class NoFixError(Exception):
 
 
 class GpsResponse(object):
-    """ Class representing geo information returned by GPSD """
+    """ Class representing geo information returned by GPSD
+
+    Use the attributes to get the raw gpsd data, use the methods to get parsed and corrected information.
+
+    :type mode: int
+    :type sats: int
+    :type lon: float
+    :type lat: float
+    :type alt: float
+    :type track: float
+    :type hspeed: float
+    :type climb: float
+    :type time: str
+    :type error: dict[str, float]
+
+    :var self.mode: Indicates the status of the GPS reception, 0=No value, 1=No fix, 2=2D fix, 3=3D fix
+    :var self.sats: The number of satellites received by the GPS unit
+    :var self.lon: Longitude in degrees
+    :var self.lat: Latitude in degrees
+    :var self.alt: Altitude in meters
+    :var self.track: Course over ground, degrees from true north
+    :var self.hspeed: Speed over ground, meters per second
+    :var self.climb: Climb (positive) or sink (negative) rate, meters per second
+    :var self.time: Time/date stamp in ISO8601 format, UTC. May have a fractional part of up to .001sec precision.
+    :var self.error: GPSD error margin information
+
+    GPSD error margin information
+    -----------------------------
+
+    c: ecp: Climb/sink error estimate in meters/sec, 95% confidence.
+    s: eps: Speed error estinmate in meters/sec, 95% confidence.
+    t: ept: Estimated timestamp error (%f, seconds, 95% confidence).
+    v: epv: Estimated vertical error in meters, 95% confidence. Present if mode is 3 and DOPs can be
+            calculated from the satellite view.
+    x: epx: Longitude error estimate in meters, 95% confidence. Present if mode is 2 or 3 and DOPs
+            can be calculated from the satellite view.
+    y: epy: Latitude error estimate in meters, 95% confidence. Present if mode is 2 or 3 and DOPs can
+            be calculated from the satellite view.
+    """
 
     def __init__(self):
         self.mode = 0
         self.sats = 0
-        self.lon = 0
-        self.lat = 0
-        self.alt = 0
+        self.lon = 0.0
+        self.lat = 0.0
+        self.alt = 0.0
         self.track = 0
         self.hspeed = 0
         self.climb = 0
@@ -76,13 +114,21 @@ class GpsResponse(object):
         return result
 
     def position(self):
-        """ Get the latitude and longtitude as tuple """
+        """ Get the latitude and longtitude as tuple.
+        Needs at least 2D fix.
+
+        :return: (float, float)
+        """
         if self.mode < 2:
             raise NoFixError("Needs at least 2D fix")
         return self.lat, self.lon
 
     def altitude(self):
-        """ Get the altitude in meters """
+        """ Get the altitude in meters.
+        Needs 3D fix
+
+        :return: (float)
+        """
         if self.mode < 3:
             raise NoFixError("Needs at least 3D fix")
         return self.alt
@@ -93,20 +139,33 @@ class GpsResponse(object):
         The speed is the horisontal speed.
         The climb is the vertical speed
         The track is te direction of the motion
+        Needs at least 3D fix
+
+        :return: dict[str, float]
         """
         if self.mode < 3:
             raise NoFixError("Needs at least 3D fix")
         return {"speed": self.hspeed, "track": self.track, "climb": self.climb}
 
     def speed_vertical(self):
-        """ Get the vertical speed with the small movements filtered out. """
+        """ Get the vertical speed with the small movements filtered out.
+        Needs at least 2D fix
+
+        :return: float
+        """
+        if self.mode < 2:
+            raise NoFixError("Needs at least 2D fix")
         if abs(self.climb) < self.error['c']:
             return 0
         else:
             return self.climb
 
     def speed(self):
-        """ Get the horisontal speed with the small movements filtered out."""
+        """ Get the horisontal speed with the small movements filtered out.
+        Needs at least 2D fix
+
+        :return: float
+        """
         if self.mode < 2:
             raise NoFixError("Needs at least 2D fix")
         if self.hspeed < self.error['s']:
@@ -115,7 +174,15 @@ class GpsResponse(object):
             return self.hspeed
 
     def position_precision(self):
-        """ Get the error margin in meters for the current fix."""
+        """ Get the error margin in meters for the current fix.
+
+        The first value return is the horisontal error, the second
+        is the vertical error if a 3D fix is available
+
+        Needs at least 2D fix
+
+        :return: (float, float)
+        """
         if self.mode < 2:
             raise NoFixError("Needs at least 2D fix")
         return max(self.error['x'], self.error['y']), self.error['v']
@@ -129,6 +196,12 @@ class GpsResponse(object):
         return "http://www.openstreetmap.org/?mlat={}&mlon={}&zoom=15".format(self.lat, self.lon)
 
     def time(self, local_time=False):
+        """ Get the GPS time
+
+        :type local_time: bool
+        :param local_time: Return date in the local timezone instead of UTC
+        :return: datetime.datetime
+        """
         if self.mode < 2:
             raise NoFixError("Needs at least 2D fix")
         time = datetime.datetime.strptime(self.time, gpsTimeFormat)
