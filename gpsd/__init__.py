@@ -1,10 +1,12 @@
 import socket
 import json
 import logging
+import datetime
 
 gpsd_socket = None
 gpsd_stream = None
 state = {}
+gpsTimeFormat = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
 def _parse_state_packet(json_data):
@@ -33,6 +35,7 @@ class GpsResponse(object):
         self.track = 0
         self.hspeed = 0
         self.climb = 0
+        self.time = ''
         self.error = {}
 
     @classmethod
@@ -54,6 +57,7 @@ class GpsResponse(object):
             result.lat = last_tpv['lat']
             result.track = last_tpv['track']
             result.hspeed = last_tpv['speed']
+            result.time = last_tpv['time']
             result.error = {
                 'c': 0,
                 's': last_tpv['eps'] if 'eps' in last_tpv else 0,
@@ -123,6 +127,16 @@ class GpsResponse(object):
         if self.mode < 2:
             raise NoFixError("Needs at least 2D fix")
         return "http://www.openstreetmap.org/?mlat={}&mlon={}&zoom=15".format(self.lat, self.lon)
+
+    def time(self, local_time=False):
+        if self.mode < 2:
+            raise NoFixError("Needs at least 2D fix")
+        time = datetime.datetime.strptime(self.time, gpsTimeFormat)
+
+        if local_time:
+            time = time.replace(tzinfo=datetime.timezone.utc).astimezone()
+
+        return time
 
     def __repr__(self):
         modes = {
