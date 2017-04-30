@@ -91,11 +91,11 @@ class GpsResponse(object):
         result.mode = last_tpv['mode']
 
         if last_tpv['mode'] >= 2:
-            result.lon = last_tpv['lon']
-            result.lat = last_tpv['lat']
-            result.track = last_tpv['track']
-            result.hspeed = last_tpv['speed']
-            result.time = last_tpv['time']
+            result.lon = last_tpv['lon'] if 'lon' in last_tpv else 0.0
+            result.lat = last_tpv['lat'] if 'lat' in last_tpv else 0.0
+            result.track = last_tpv['track'] if 'track' in last_tpv else 0
+            result.hspeed = last_tpv['speed'] if 'speed' in last_tpv else 0
+            result.time = last_tpv['time'] if 'time' in last_tpv else ''
             result.error = {
                 'c': 0,
                 's': last_tpv['eps'] if 'eps' in last_tpv else 0,
@@ -106,9 +106,9 @@ class GpsResponse(object):
             }
 
         if last_tpv['mode'] >= 3:
-            result.alt = last_tpv['alt']
-            result.climb = last_tpv['climb']
-            result.error['c'] = last_tpv['epc'] if 'epc' in last_tpv else 0,
+            result.alt = last_tpv['alt'] if 'alt' in last_tpv else 0.0
+            result.climb = last_tpv['climb'] if 'climb' in last_tpv else 0
+            result.error['c'] = last_tpv['epc'] if 'epc' in last_tpv else 0
             result.error['v'] = last_tpv['epv'] if 'epv' in last_tpv else 0
 
         return result
@@ -136,7 +136,7 @@ class GpsResponse(object):
     def movement(self):
         """ Get the speed and direction of the current movement as dict
 
-        The speed is the horisontal speed.
+        The speed is the horizontal speed.
         The climb is the vertical speed
         The track is te direction of the motion
         Needs at least 3D fix
@@ -161,7 +161,7 @@ class GpsResponse(object):
             return self.climb
 
     def speed(self):
-        """ Get the horisontal speed with the small movements filtered out.
+        """ Get the horizontal speed with the small movements filtered out.
         Needs at least 2D fix
 
         :return: float
@@ -176,7 +176,7 @@ class GpsResponse(object):
     def position_precision(self):
         """ Get the error margin in meters for the current fix.
 
-        The first value return is the horisontal error, the second
+        The first value return is the horizontal error, the second
         is the vertical error if a 3D fix is available
 
         Needs at least 2D fix
