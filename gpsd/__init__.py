@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 def _parse_state_packet(json_data):
     global state
-    print(json_data)
     if json_data['class'] == 'DEVICES':
         if not json_data['devices']:
             logger.warn('No gps devices found')
