@@ -20,7 +20,8 @@ def _parse_state_packet(json_data):
     elif json_data['class'] == 'WATCH':
         state['watch'] = json_data
     else:
-        raise Exception("Unexpected message received from gps: {}".format(json_data['class']))
+        raise Exception(
+            "Unexpected message received from gps: {}".format(json_data['class']))
 
 
 class NoFixError(Exception):
@@ -34,6 +35,7 @@ class GpsResponse(object):
 
     :type mode: int
     :type sats: int
+    :type sats_valid: int
     :type lon: float
     :type lat: float
     :type alt: float
@@ -45,6 +47,7 @@ class GpsResponse(object):
 
     :var self.mode: Indicates the status of the GPS reception, 0=No value, 1=No fix, 2=2D fix, 3=3D fix
     :var self.sats: The number of satellites received by the GPS unit
+    :var self.sats_valid: The number of satellites with valid information
     :var self.lon: Longitude in degrees
     :var self.lat: Latitude in degrees
     :var self.alt: Altitude in meters
@@ -71,6 +74,7 @@ class GpsResponse(object):
     def __init__(self):
         self.mode = 0
         self.sats = 0
+        self.sats_valid = 0
         self.lon = 0.0
         self.lat = 0.0
         self.alt = 0.0
@@ -94,6 +98,8 @@ class GpsResponse(object):
         last_sky = packet['sky'][-1]
 
         result.sats = len(last_sky['satellites'])
+        result.sats_valid = len(
+            [sat for sat in last_sky['satellites'] if sat['used'] == True])
         result.mode = last_tpv['mode']
 
         if last_tpv['mode'] >= 2:
@@ -246,7 +252,8 @@ def connect(host="127.0.0.1", port=2947):
     welcome_raw = gpsd_stream.readline()
     welcome = json.loads(welcome_raw)
     if welcome['class'] != "VERSION":
-        raise Exception("Unexpected data received as welcome. Is the server a gpsd 3 server?")
+        raise Exception(
+            "Unexpected data received as welcome. Is the server a gpsd 3 server?")
     logger.debug("Enabling gps")
     gpsd_stream.write('?WATCH={"enable":true}\n')
     gpsd_stream.flush()
@@ -268,7 +275,8 @@ def get_current():
     raw = gpsd_stream.readline()
     response = json.loads(raw)
     if response['class'] != 'POLL':
-        raise Exception("Unexpected message received from gps: {}".format(response['class']))
+        raise Exception(
+            "Unexpected message received from gps: {}".format(response['class']))
     return GpsResponse.from_json(response)
 
 
