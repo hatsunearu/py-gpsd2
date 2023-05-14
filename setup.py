@@ -3,13 +3,13 @@
 from setuptools import setup
 
 setup(
-        name='gpsd-py3',
-        version='0.3.0',
-        packages=['gpsd'],
-        url='https://github.com/MartijnBraam/gpsd-py3',
+        name='py-gpsd2',
+        version='0.1.0',
+        packages=['gpsd2'],
+        url='https://github.com/hatsunearu/py-gpsd2',
         license='MIT',
-        author='Martijn Braam',
-        author_email='martijn@brixit.nl',
+        author='Martijn Braam', 'hatsunearu',
+        author_email='me@hatsunearu',
         description='Python 3 library for working with gpsd',
         keywords=["gps", "gpsd"],
         classifiers=[
