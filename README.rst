@@ -3,7 +3,7 @@ Python3 GPSD client
 
 This is a library for polling gpsd in Python3.
 
-Forked from [gpsd-py3](https://github.com/MartijnBraam/gpsd-py3).
+Forked from (gpsd-py3)[https://github.com/MartijnBraam/gpsd-py3]
 
 Installation
 ------------
