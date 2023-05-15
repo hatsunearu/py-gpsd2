@@ -1,3 +1,37 @@
+Python3 GPSD client
+===================
+
+This is a library for polling gpsd in Python3.
+
+Forked from (gpsd-py3)[https://github.com/MartijnBraam/gpsd-py3]
+
+Installation
+------------
+
+Install through pip::
+
+    $ pip3 install py-gpsd2
+
+Usage
+-----
+
+Just import it and poll the gps. Only a single gpsd server a time is supported::
+
+    import gpsd2
+
+    # Connect to the local gpsd
+    gpsd2.connect()
+
+    # Connect somewhere else
+    gpsd2.connect(host="127.0.0.1", port=123456)
+
+    # Get gps position
+    packet = gpsd2.get_current()
+
+    # See the inline docs for GpsResponse for the available data
+    print(packet.position())
+
+
 GpsResponse Object Information
 -----
 
@@ -73,15 +107,10 @@ Description and information copied from [http://catb.org/gpsd/gpsd_json.html](ht
 	- *Availability:* mode >= 2
 	- *Parameters:* None
 	- *Return Type:* tuple (x-y plane, z direction)
-- **time_utc**
-	- *Description:* Get the GPS time UTC
+- **get_time(local_time: bool)**
+	- *Description:* Get the GPS time in UTC or in local timezone
 	- *Availability:* mode >= 2
-	- *Parameters:* None
-	- *Return Type:* datetime
-- **time_local**
-	- *Description:* Get the GPS time in local timezone
-	- *Availability:* mode >= 2
-	- *Parameters:* None
+	- *Parameters:* local_time
 	- *Return Type:* datetime
 - **map_url**
 	- *Description:* Get a openstreetmap url for the current position
@@ -214,7 +243,8 @@ print("Device: " + str(gpsd.device()))
 ```
 
 
-###Sample Output##
+### Sample Output ###
+```
      ************ PROPERTIES *************
                   Mode: 3
             Satellites: 10
@@ -236,3 +266,4 @@ print("Device: " + str(gpsd.device()))
                Altitude: 100.3
      ************* FUNCTIONS *************
                  Device: {'driver': 'MTK-3301', 'path': '/dev/ttyS0', 'speed': 9600}
+```
